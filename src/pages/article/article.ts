@@ -6,6 +6,8 @@ import {
   NavParams,
   LoadingController
 } from 'ionic-angular';
+import { WordpressProvider } from './../../providers/wordpress/wordpress';
+import { Post } from './../../models/wordpress';
 
 /**
  * Generated class for the ArticlePage page.
@@ -20,15 +22,11 @@ import {
 })
 @Component({
   selector: 'page-article',
-  templateUrl: 'article.html'
+  templateUrl: 'article.html',
+  providers: [WordpressProvider]
 })
 export class ArticlePage {
-  post: {
-    ID: number;
-    title: string;
-    content: string;
-    date: string;
-  } = {
+  post: Post = {
     title: null,
     ID: null,
     content: null,
@@ -37,8 +35,8 @@ export class ArticlePage {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams,
-    public http: HttpClient,
-    public loadingCtrl: LoadingController
+    public loadingCtrl: LoadingController,
+    public wp: WordpressProvider
   ) {}
 
   ionViewDidLoad() {
@@ -46,19 +44,9 @@ export class ArticlePage {
     loading.present();
 
     const id = this.navParams.get('id');
-    this.http
-      .get<{
-        ID: number;
-        title: string;
-        content: string;
-        date: string;
-      }>(
-        'https://public-api.wordpress.com/rest/v1.1/sites/ionicjp.wordpress.com/posts/' +
-          id
-      )
-      .subscribe(data => {
-        this.post = data;
-        loading.dismiss();
-      });
+    this.wp.getArticle(id).subscribe(data => {
+      this.post = data;
+      loading.dismiss();
+    });
   }
 }
